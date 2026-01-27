@@ -1,0 +1,128 @@
+/* =========================
+   CATERING GRID
+========================= */
+.catering-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:18px;
+}
+
+
+
+/* =========================
+   CATERING CARD
+========================= */
+.catering-card{
+  background:white;
+  padding:14px;
+  border-radius:14px;
+  text-align:center;
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+  transition:0.3s ease;
+  cursor:pointer;
+}
+
+
+
+
+/* Hover effect */
+.catering-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+}
+
+/* Selected state */
+.catering-card.selected {
+  border: 2px solid #28a745;
+  background: #f0fff4;
+}
+
+/* =========================
+   IMAGE
+========================= */
+.catering-card img{
+  width:100%;
+  height:100px;
+  object-fit:cover;
+  border-radius:10px;
+  margin-bottom:8px;
+}
+
+/* =========================
+   TEXT
+========================= */
+.catering-card h3 {
+  font-size:15px;
+  margin-bottom:4px;
+  font-weight:600;
+}
+
+.catering-card p {
+  font-size:13px;
+  color:#666;
+}
+
+/* =========================
+   PRICE BADGE
+========================= */
+.price-badge {
+  background: linear-gradient(135deg,#007bff,#00c6ff);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+/* =========================
+   BUTTON
+========================= */
+.catering-card button{
+  margin-top:8px;
+  padding:6px 10px;
+  font-size:14px;
+}
+/* =========================
+   TOTAL BAR
+========================= */
+.total-bar {
+  background: #fff;
+  padding: 16px;
+  margin-top: 20px;
+  border-radius: 10px;
+  text-align: right;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+/* =========================
+   DARK MODE SUPPORT
+========================= */
+.dark .catering-card{
+  background:#1e293b;
+  color:white;
+}
+
+.dark .catering-card p{
+  color:#cbd5e1;
+}
+
+.dark .total-bar{
+  background:#1e293b;
+  color:white;
+}
+
+.filter-bar{
+  display:flex;
+  gap:12px;
+  margin-bottom:20px;
+  align-items:center;
+}
+
+.filter-bar input,
+.filter-bar select{
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
