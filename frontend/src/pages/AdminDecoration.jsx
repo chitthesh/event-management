@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import API from "../services/api";
 
-const API_URL = "http://localhost:5000/api/decorations";
+const API_URL = "/decorations";
 
 export default function AdminDecorations() {
 
@@ -26,11 +26,8 @@ export default function AdminDecorations() {
 
   const fetchDecorations = async () => {
     try {
-      const res = await axios.get(
-        `${API_URL}?page=${page}`
-      );
+      const res = await API.get(`${API_URL}?page=${page}`);
 
-      /* PAGINATION RESPONSE */
       if (Array.isArray(res.data.data)) {
         setList(res.data.data);
         setPages(res.data.pages || 1);
@@ -59,7 +56,7 @@ export default function AdminDecorations() {
       formData.append("price", price);
       if (image) formData.append("image", image);
 
-      await axios.post(API_URL, formData, {
+      await API.post(API_URL, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
 
@@ -85,7 +82,7 @@ export default function AdminDecorations() {
     if (!window.confirm("Delete decoration?")) return;
 
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await API.delete(`${API_URL}/${id}`);
       fetchDecorations();
     } catch (err) {
       console.error(err);
@@ -111,7 +108,6 @@ export default function AdminDecorations() {
         onChange={e => setPrice(e.target.value)}
       />
 
-      {/* IMAGE PICKER */}
       <input
         type="file"
         accept="image/*"
@@ -122,7 +118,6 @@ export default function AdminDecorations() {
         }}
       />
 
-      {/* PREVIEW */}
       {preview && (
         <img
           src={preview}
@@ -140,9 +135,7 @@ export default function AdminDecorations() {
 
       <h3>All Decorations</h3>
 
-      {list.length === 0 && (
-        <p>No decorations found</p>
-      )}
+      {list.length === 0 && <p>No decorations found</p>}
 
       <div className="catering-grid">
         {list.map(d => (
@@ -169,7 +162,6 @@ export default function AdminDecorations() {
         ))}
       </div>
 
-      {/* PAGINATION */}
       {pages > 1 && (
         <div style={{ marginTop: 20 }}>
           <button

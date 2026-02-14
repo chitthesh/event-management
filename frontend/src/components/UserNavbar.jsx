@@ -18,7 +18,7 @@ export default function UserNavbar() {
     >
       <div className="navbar-inner">
         {/* Brand */}
-        <div className="navbar-brand">Eventify</div>
+        <div className="navbar-brand">Master Unique</div>
 
         {/* Links */}
         <div className="navbar-links">

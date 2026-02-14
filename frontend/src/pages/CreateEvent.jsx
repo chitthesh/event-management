@@ -5,6 +5,10 @@ import EventTypeSelect from "../components/EventTypeSelect";
 import Catering from "./Catering";
 import ItemSelect from "../components/ItemSelect";
 import ClientDecorationUpload from "../components/ClientDecorationUpload";
+import confetti from "canvas-confetti";
+import { motion } from "framer-motion";
+
+const BASE_MEAL_PRICE = 75;
 
 export default function CreateEvent() {
   const navigate = useNavigate();
@@ -17,14 +21,19 @@ export default function CreateEvent() {
   const [showModal, setShowModal] = useState(false);
   const [dark, setDark] = useState(false);
   const [eventDate, setEventDate] = useState("");
-  const [refreshDecor, setRefreshDecor] = useState(false); // 🔥 force reload
-const [draftEventId, setDraftEventId] = useState(null);
+  const [refreshDecor, setRefreshDecor] = useState(false);
+  const [draftEventId, setDraftEventId] = useState(null);
 
-  /* COST */
-  const cateringCost = cateringServices.reduce(
-    (sum, c) => sum + c.pricePerPlate * guests,
-    0
-  );
+  /* =========================
+     COST CALCULATION
+  ========================= */
+
+  const cateringCost =
+    guests * BASE_MEAL_PRICE +
+    cateringServices.reduce(
+      (sum, c) => sum + (c.pricePerPlate || 0) * guests,
+      0
+    );
 
   const itemsCost = items.reduce(
     (sum, i) => sum + (i.price || 0),
@@ -33,46 +42,78 @@ const [draftEventId, setDraftEventId] = useState(null);
 
   const totalCost = cateringCost + itemsCost;
 
-  /* STEP 1 */
+  /* =========================
+     VALIDATION
+  ========================= */
+
   const submit = () => {
     if (!eventType) return alert("Please select event type");
     if (!eventDate) return alert("Please select date");
+    if (guests <= 0) return alert("Guests must be more than 0");
     if (cateringServices.length === 0)
       return alert("Please select catering items");
 
     setShowModal(true);
   };
 
-  /* STEP 2 */
+  /* =========================
+     CONFIRM EVENT
+  ========================= */
+
   const confirmCreate = async () => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const res = await API.post("/events/create", {
-      eventType,
-      guests,
-      eventDate,
-      cateringServices: cateringServices.map(c => c._id),
-      items: items.map(i => i._id),
-      totalCost
-    });
+      const res = await API.post("/events/create", {
+        eventType,
+        guests,
+        eventDate,
+        cateringServices: cateringServices.map(c => c._id),
+        items: items.map(i => i._id),
+        totalCost
+      });
 
-    // 🔥 SAVE EVENT ID FOR CLIENT DECOR
-    setDraftEventId(res.data._id);
+      setDraftEventId(res.data._id);
 
-    alert("🎉 Event Created!");
-    navigate("/dashboard");
+      confetti({
+        particleCount: 150,
+        spread: 90,
+        origin: { y: 0.6 }
+      });
 
-  } catch (error) {
-    alert("Failed to create event");
-  } finally {
-    setLoading(false);
-    setShowModal(false);
-  }
-};
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1200);
+
+    } catch (error) {
+      console.error(error);
+      alert("Failed to create event");
+    } finally {
+      setLoading(false);
+      setShowModal(false);
+    }
+  };
+
+  /* =========================
+     DARK MODE
+  ========================= */
+
+  useEffect(() => {
+    if (dark) {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
+  }, [dark]);
 
   return (
-    <div className={`create-wrapper ${dark ? "dark" : ""}`}>
+    <motion.div
+      className="create-wrapper"
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -40 }}
+      transition={{ duration: 0.4 }}
+    >
 
       {/* HEADER */}
       <div className="create-header">
@@ -86,23 +127,23 @@ const [draftEventId, setDraftEventId] = useState(null);
         </button>
       </div>
 
-      {/* PROGRESS */}
+      {/* PROGRESS BAR */}
       <div className="progress-big">
         <div className={`circle ${eventType && "active"}`}>1</div>
         <span></span>
 
-        <div className={`circle ${cateringServices.length && "active"}`}>2</div>
+        <div className={`circle ${cateringServices.length > 0 && "active"}`}>2</div>
         <span></span>
 
-        <div className={`circle ${items.length && "active"}`}>3</div>
+        <div className={`circle ${items.length > 0 && "active"}`}>3</div>
       </div>
 
       {/* MAIN GRID */}
       <div className="create-grid">
 
-        {/* LEFT */}
         <div>
 
+          {/* EVENT DETAILS */}
           <div className="glass-card">
             <h3>Event Details</h3>
 
@@ -125,6 +166,7 @@ const [draftEventId, setDraftEventId] = useState(null);
             />
           </div>
 
+          {/* CATERING */}
           <div className="glass-card">
             <h3>Catering</h3>
             <Catering
@@ -133,17 +175,15 @@ const [draftEventId, setDraftEventId] = useState(null);
             />
           </div>
 
-          {/* 🎀 DECORATION */}
+          {/* DECORATIONS */}
           <div className="glass-card">
             <h3>Decorations</h3>
 
-            {/* CLIENT CUSTOM UPLOAD */}
             <ClientDecorationUpload
-  eventId={draftEventId}
-  onUpload={() => setRefreshDecor(!refreshDecor)}
-/>
+              eventId={draftEventId}
+              onUpload={() => setRefreshDecor(!refreshDecor)}
+            />
 
-            {/* ADMIN + CLIENT DECOR LIST */}
             <ItemSelect
               key={refreshDecor}
               setItems={setItems}
@@ -152,9 +192,8 @@ const [draftEventId, setDraftEventId] = useState(null);
 
         </div>
 
-        {/* SUMMARY */}
+        {/* SUMMARY PANEL */}
         <div className="summary-panel medium">
-
           <h3>Order Summary</h3>
 
           <p>Guests: <b>{guests}</b></p>
@@ -168,11 +207,10 @@ const [draftEventId, setDraftEventId] = useState(null);
           <button className="primary full" onClick={submit}>
             Create Event
           </button>
-
         </div>
       </div>
 
-      {/* CONFIRM */}
+      {/* CONFIRM MODAL */}
       {showModal && (
         <div className="modal">
           <div className="modal-box">
@@ -196,23 +234,30 @@ const [draftEventId, setDraftEventId] = useState(null);
           </div>
         </div>
       )}
-    </div>
+
+    </motion.div>
   );
 }
 
-/* ANIMATED TOTAL */
+/* =========================
+   ANIMATED TOTAL
+========================= */
+
 function Animated({ value }) {
   const [num, setNum] = useState(0);
 
   useEffect(() => {
-    let i = 0;
+    let current = 0;
+
     const interval = setInterval(() => {
-      i += Math.ceil(value / 30);
-      if (i >= value) {
-        i = value;
+      current += Math.ceil(value / 30);
+
+      if (current >= value) {
+        current = value;
         clearInterval(interval);
       }
-      setNum(i);
+
+      setNum(current);
     }, 30);
 
     return () => clearInterval(interval);

@@ -1,4 +1,28 @@
 /* =========================
+   THEME VARIABLES
+========================= */
+
+:root {
+  /* LIGHT THEME */
+  --bg: #f4f6f8;
+  --card-bg: #ffffff;
+  --text: #1f2937;
+  --muted-text: #6b7280;
+  --navbar-bg: #1e1e2f;
+  --border: #e5e7eb;
+}
+
+body.dark {
+  /* DARK THEME */
+  --bg: #111827;
+  --card-bg: #1f2937;
+  --text: #f9fafb;
+  --muted-text: #9ca3af;
+  --navbar-bg: #0f172a;
+  --border: #374151;
+}
+
+/* =========================
    GLOBAL RESET & BASE
 ========================= */
 * {
@@ -9,9 +33,12 @@
 }
 
 body {
-  background: #f4f6f8;
-  color: #333;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease;
 }
+
+
 
 /* =========================
    LAYOUT
@@ -23,7 +50,9 @@ body {
 }
 
 .card {
-  background: #ffffff;
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -35,7 +64,7 @@ body {
 ========================= */
 h1, h2, h3 {
   margin-bottom: 15px;
-  color: #ffffff;
+    color: var(--text);
 }
 
 h2 {
@@ -55,8 +84,20 @@ input, select {
   margin-top: 6px;
   margin-bottom: 15px;
   border-radius: 5px;
-  border: 1px solid #ccc;
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
   font-size: 15px;
+}
+body.dark input,
+body.dark select {
+  background: #2a2a3d;
+  color: #ffffff;
+  border: 1px solid #444;
+}
+
+body.dark input::placeholder {
+  color: #aaa;
 }
 
 input:focus, select:focus {
@@ -105,7 +146,7 @@ button:hover {
 ========================= */
 .navbar {
   width: 100%;
-  background: #1e1e2f;
+ background: var(--navbar-bg);
 }
 
 .navbar-inner {
@@ -229,7 +270,8 @@ button:hover {
 }
 
 .stat-card {
-  background: #ffffff;
+ background: var(--card-bg);
+  color: var(--text);
   padding: 18px;
   border-radius: 8px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
@@ -251,7 +293,7 @@ button:hover {
 ========================= */
 .empty {
   text-align: center;
-  color: #777;
+  color: var(--muted-text);
   padding: 30px;
 }
 
@@ -329,4 +371,55 @@ button:hover {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #333;
+  transition: all 0.3s ease;
+}
+.catering-card {
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.catering-card button {
+  position: relative;
+  z-index: 2;
+}
+
+.slide-summary {
+  position: fixed;
+  right: -350px;
+  top: 0;
+  width: 320px;
+  height: 100%;
+  background: var(--card-bg);
+  padding: 20px;
+  box-shadow: -5px 0 25px rgba(0,0,0,0.2);
+  transition: right 0.4s ease;
+  z-index: 999;
+}
+
+.slide-summary.open {
+  right: 0;
 }

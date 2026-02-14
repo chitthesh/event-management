@@ -1,5 +1,4 @@
 import {
-  BrowserRouter,
   Routes,
   Route,
   Navigate,
@@ -16,7 +15,7 @@ import Catering from "./pages/Catering";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminEventTypes from "./pages/AdminEventTypes";
 import AdminCatering from "./pages/AdminCatering";
-import AdminDecorations from "./pages/AdminDecoration"; 
+import AdminDecorations from "./pages/AdminDecoration";
 
 import UserNavbar from "./components/UserNavbar";
 import AdminNavbar from "./components/AdminNavbar";
@@ -24,6 +23,7 @@ import AdminRoute from "./components/AdminRoute";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AnimatePresence } from "framer-motion";
 
 /* 🔐 Client Route Protection */
 const PrivateRoute = ({ children }) => {
@@ -51,96 +51,98 @@ function Layout({ children }) {
 }
 
 function App() {
-  return (
-    <BrowserRouter>
+  const location = useLocation();
 
-      {/* 🔔 TOAST NOTIFICATIONS */}
+  return (
+    <>
+      <Layout>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+
+            {/* 🌐 Public */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            {/* 👤 Client */}
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/create"
+              element={
+                <PrivateRoute>
+                  <CreateEvent />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/catering"
+              element={
+                <PrivateRoute>
+                  <Catering />
+                </PrivateRoute>
+              }
+            />
+
+            {/* 👑 Admin */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
+              }
+            />
+
+            <Route
+              path="/admin/event-types"
+              element={
+                <AdminRoute>
+                  <AdminEventTypes />
+                </AdminRoute>
+              }
+            />
+
+            <Route
+              path="/admin/catering"
+              element={
+                <AdminRoute>
+                  <AdminCatering />
+                </AdminRoute>
+              }
+            />
+
+            <Route
+              path="/admin/decorations"
+              element={
+                <AdminRoute>
+                  <AdminDecorations />
+                </AdminRoute>
+              }
+            />
+
+            {/* ❌ Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+
+          </Routes>
+        </AnimatePresence>
+      </Layout>
+
+      {/* 🔔 Toast Notifications */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
         theme="colored"
       />
-
-      <Layout>
-        <Routes>
-
-          {/* 🌐 Public */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-
-          {/* 👤 Client */}
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/create"
-            element={
-              <PrivateRoute>
-                <CreateEvent />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/catering"
-            element={
-              <PrivateRoute>
-                <Catering />
-              </PrivateRoute>
-            }
-          />
-
-          {/* 👑 Admin */}
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
-            }
-          />
-
-          <Route
-            path="/admin/event-types"
-            element={
-              <AdminRoute>
-                <AdminEventTypes />
-              </AdminRoute>
-            }
-          />
-
-          <Route
-            path="/admin/catering"
-            element={
-              <AdminRoute>
-                <AdminCatering />
-              </AdminRoute>
-            }
-          />
-
-          {/* ✅ DECORATION ROUTE */}
-          <Route
-            path="/admin/decorations"
-            element={
-              <AdminRoute>
-                <AdminDecorations />
-              </AdminRoute>
-            }
-          />
-
-          {/* ❌ Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-
-        </Routes>
-      </Layout>
-    </BrowserRouter>
+    </>
   );
 }
 

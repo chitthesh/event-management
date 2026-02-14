@@ -3,7 +3,6 @@ const User = require("../models/User");
 
 exports.protect = async (req, res, next) => {
   try {
-    /* 1️⃣ CHECK TOKEN */
     if (
       !req.headers.authorization ||
       !req.headers.authorization.startsWith("Bearer ")
@@ -13,18 +12,15 @@ exports.protect = async (req, res, next) => {
       });
     }
 
-    /* 2️⃣ EXTRACT TOKEN */
     const token = req.headers.authorization.split(" ")[1];
 
-    /* 3️⃣ VERIFY TOKEN */
+    // ❌ REMOVE fallback
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "secretkey"
+      process.env.JWT_SECRET
     );
 
-    /* 4️⃣ FETCH USER */
-    const user = await User.findById(decoded.id)
-      .select("-password");
+    const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
       return res.status(401).json({
@@ -32,9 +28,8 @@ exports.protect = async (req, res, next) => {
       });
     }
 
-    /* 5️⃣ ATTACH USER */
     req.user = {
-      id: user._id.toString(), // ✅ STANDARD ID
+      id: user._id.toString(),
       role: user.role,
       email: user.email
     };
@@ -42,29 +37,18 @@ exports.protect = async (req, res, next) => {
     next();
 
   } catch (error) {
-    console.error(
-      "AUTH MIDDLEWARE ERROR:",
-      error.message
-    );
-
+    console.error("AUTH ERROR:", error.message);
     return res.status(401).json({
       message: "Invalid or expired token"
     });
   }
 };
 
-/* =====================
-   ADMIN ONLY
-===================== */
 exports.adminOnly = (req, res, next) => {
-  if (
-    !req.user ||
-    req.user.role !== "admin"
-  ) {
+  if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({
       message: "Admin access only"
     });
   }
-
   next();
 };

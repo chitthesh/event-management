@@ -3,47 +3,78 @@ import API from "../services/api";
 
 const BASE_MEAL_PRICE = 75;
 
-export default function Catering({ guests, setCateringServices }) {
+export default function Catering({ guests = 0, setCateringServices }) {
 
   const [items, setItems] = useState([]);
   const [selected, setSelected] = useState([]);
   const [payasam, setPayasam] = useState("Rice Payasam");
   const [loading, setLoading] = useState(true);
 
-  /* LOAD FOOD FROM DB (ADMIN ADDED ONLY) */
+  /* =========================
+     LOAD CATERING ITEMS
+  ========================= */
   useEffect(() => {
-    API.get("/catering")
-      .then(res => setItems(res.data))
-      .catch(err => console.log(err))
-      .finally(() => setLoading(false));
+    const loadItems = async () => {
+      try {
+        const res = await API.get("/catering");
+
+        if (Array.isArray(res.data)) {
+          setItems(res.data);
+        } else {
+          setItems([]);
+        }
+
+      } catch (err) {
+        console.error("Catering load error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadItems();
   }, []);
 
-  /* TOGGLE FOOD */
+  /* =========================
+     SYNC WITH PARENT
+  ========================= */
+  useEffect(() => {
+  if (!setCateringServices) return;
+
+  // ONLY SEND REAL DB ITEMS
+  setCateringServices(selected);
+
+}, [selected, setCateringServices]);
+
+
+  /* =========================
+     TOGGLE ITEM
+  ========================= */
   const toggle = (item) => {
-
-    let updated;
-
-    if (selected.some(i => i._id === item._id)) {
-      updated = selected.filter(i => i._id !== item._id);
-    } else {
-      updated = [...selected, item];
-    }
-
-    setSelected(updated);
-    setCateringServices(updated); // send to parent
+    setSelected(prev => {
+      const exists = prev.some(i => i._id === item._id);
+      return exists
+        ? prev.filter(i => i._id !== item._id)
+        : [...prev, item];
+    });
   };
 
-  /* COST */
+  /* =========================
+     COST CALCULATION
+  ========================= */
   const extrasCost = selected.reduce(
-    (sum, i) => sum + i.pricePerPlate,
+    (sum, i) => sum + (Number(i.pricePerPlate) || 0),
     0
   );
 
   const total =
-    guests * (BASE_MEAL_PRICE + extrasCost);
+    Number(guests) * (BASE_MEAL_PRICE + extrasCost);
 
   const filterByCategory = (cat) =>
-    items.filter(i => i.category === cat);
+    items.filter(
+      i =>
+        i.category &&
+        i.category.toLowerCase() === cat.toLowerCase()
+    );
 
   if (loading) return <p>Loading menu...</p>;
 
@@ -52,9 +83,12 @@ export default function Catering({ guests, setCateringServices }) {
 
       <h3>Catering Selection</h3>
 
-      {/* BASE MEAL */}
-      <div className="card">
-        <h4>Base Meal (₹75 per person – mandatory)</h4>
+      {/* =========================
+         BASE MEAL (LOCKED)
+      ========================= */}
+      <div className="catering-card base-meal">
+
+        <h4>Base Meal (Mandatory)</h4>
 
         <ul>
           <li>Pickle</li>
@@ -72,9 +106,20 @@ export default function Catering({ guests, setCateringServices }) {
           <option>Vermicelli Payasam</option>
           <option>Moong Dal Payasam</option>
         </select>
+
+        <div className="price-badge locked">
+          ₹{BASE_MEAL_PRICE} / plate
+        </div>
+
+        <button className="locked-btn" disabled>
+          Included
+        </button>
+
       </div>
 
-      {/* FOOD ITEMS */}
+      {/* =========================
+         FOOD BY CATEGORY
+      ========================= */}
       {["starter", "main course", "dessert", "special"].map(cat => (
         <div key={cat}>
 
@@ -84,55 +129,93 @@ export default function Catering({ guests, setCateringServices }) {
 
           <div className="catering-grid">
 
-            {filterByCategory(cat).map(i => (
-              <div
-                key={i._id}
-                className={
-                  "catering-card " +
-                  (selected.some(s => s._id === i._id)
-                    ? "selected"
-                    : "")
-                }
-              >
+            {filterByCategory(cat).length === 0 && (
+              <p>No items in this category</p>
+            )}
 
-                {i.image && (
-                  <img
-                    src={i.image}
-                    alt={i.name}
-                    onError={(e) =>
-                      (e.target.style.display = "none")
-                    }
-                  />
-                )}
+            {filterByCategory(cat).map(i => {
 
-                <h3>{i.name}</h3>
+              const isSelected =
+                selected.some(s => s._id === i._id);
 
-                <span className="price-badge">
-                  ₹{i.pricePerPlate} / plate
-                </span>
-
-                <button
+              return (
+                <div
+                  key={i._id}
                   className={
-                    selected.some(s => s._id === i._id)
-                      ? "danger"
-                      : "primary"
+                    "catering-card " +
+                    (isSelected ? "selected" : "")
                   }
-                  onClick={() => toggle(i)}
                 >
-                  {selected.some(s => s._id === i._id)
-                    ? "Remove"
-                    : "Add"}
-                </button>
 
-              </div>
-            ))}
+                  {i.image && (
+                    <img
+                      src={i.image}
+                      alt={i.name}
+                      onError={(e) =>
+                        (e.target.style.display = "none")
+                      }
+                    />
+                  )}
+
+                  <h3>{i.name}</h3>
+
+                  <span className="price-badge">
+                    ₹{i.pricePerPlate} / plate
+                  </span>
+
+                  <button
+                    className={
+                      isSelected ? "danger" : "primary"
+                    }
+                    onClick={() => toggle(i)}
+                  >
+                    {isSelected ? "Remove" : "Add"}
+                  </button>
+
+                </div>
+              );
+            })}
 
           </div>
         </div>
       ))}
+      {/* =========================
+   MINI SUMMARY SIDEBAR
+========================= */}
+<div className="mini-summary">
 
-      {/* TOTAL */}
-      <div className="total-bar">
+  <h4>🧾 Live Summary</h4>
+
+  <p><b>Guests:</b> {guests}</p>
+
+  <p>
+    <b>Base:</b> ₹{BASE_MEAL_PRICE} × {guests}
+  </p>
+
+  {selected.length > 0 && (
+    <>
+      <p><b>Extras:</b></p>
+      <ul>
+        {selected.map(i => (
+          <li key={i._id}>
+            {i.name} – ₹{i.pricePerPlate}
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+
+  <hr />
+
+  <h3>Total: ₹{total}</h3>
+
+</div>
+
+
+      {/* =========================
+         TOTAL
+      ========================= */}
+      {/* <div className="total-bar">
 
         <p>
           Base: ₹{BASE_MEAL_PRICE} × {guests} =
@@ -148,7 +231,7 @@ export default function Catering({ guests, setCateringServices }) {
 
         <h4>Total Catering Cost: ₹{total}</h4>
 
-      </div>
+      </div> */}
 
     </div>
   );

@@ -129,16 +129,25 @@ exports.deleteDecoration = async (req, res) => {
   try {
     const deco = await Decoration.findById(req.params.id);
 
-    if (!deco) return res.status(404).json({ message: "Not found" });
+    if (!deco) {
+      return res.status(404).json({ message: "Decoration not found" });
+    }
 
+    // 🔥 DELETE IMAGE SAFELY
     if (deco.image) {
-      fs.unlinkSync(path.join(__dirname, "..", deco.image));
+      const filePath = path.join(__dirname, "..", deco.image);
+
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
 
     await deco.deleteOne();
-    res.json({ message: "Deleted" });
+
+    res.json({ message: "Decoration deleted successfully" });
 
   } catch (err) {
+    console.error("DELETE DECOR ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 };
