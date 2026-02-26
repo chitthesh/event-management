@@ -136,7 +136,7 @@ export default function Dashboard() {
                   >
                     {item.image && (
                       <img
-                        src={`http://localhost:5000${item.image}`}
+                       src={`${import.meta.env.VITE_API_URL}${item.image}`}
                         alt={item.name}
                       />
                     )}

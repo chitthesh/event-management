@@ -292,7 +292,7 @@ export default function AdminDashboard() {
         >
           {d.image && (
             <img
-              src={`http://localhost:5000${d.image}`}
+              src={`${import.meta.env.VITE_API_URL}${d.image}`}
               alt={d.name}
             />
           )}

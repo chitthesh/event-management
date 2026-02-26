@@ -155,3 +155,47 @@
   border-radius:8px;
   border:1px solid #ddd;
 }
+
+.food-filter {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.food-filter button {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+.food-filter .active {
+  background: #007bff;
+  color: #fff;
+}
+
+.food-filter .veg.active {
+  background: #16a34a;
+}
+
+.food-filter .nonveg.active {
+  background: #dc2626;
+}
+
+/* BADGE */
+.type-badge {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.type-badge.veg {
+  color: #16a34a;
+}
+
+.type-badge.non-veg {
+  color: #dc2626;
+}

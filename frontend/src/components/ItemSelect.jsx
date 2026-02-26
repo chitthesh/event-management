@@ -9,6 +9,8 @@ export default function ItemSelect({ setItems }) {
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
+
+  
   /* 🔄 LOAD DECORATIONS */
   const loadDecorations = async (p = 1) => {
     try {
@@ -81,7 +83,7 @@ export default function ItemSelect({ setItems }) {
             {/* IMAGE */}
             {i.image ? (
               <img
-                src={`http://localhost:5000${i.image}`}
+                src={`${import.meta.env.VITE_API_URL}${i.image}`}
                 alt={i.name}
               />
             ) : (

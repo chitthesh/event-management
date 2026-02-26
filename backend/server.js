@@ -1,4 +1,6 @@
 require("dotenv").config();
+console.log("JWT_SECRET:", process.env.JWT_SECRET); // 🔍 DEBUG
+
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");

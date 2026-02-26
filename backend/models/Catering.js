@@ -18,6 +18,11 @@ const cateringSchema = new mongoose.Schema(
       type: Number,
       required: true
     },
+    type:{
+      type: String,
+      enum: ["veg", "non-veg", "vegan"],
+      required: true
+    },
 
     image: {
       type: String,
@@ -27,6 +32,7 @@ const cateringSchema = new mongoose.Schema(
   {
     timestamps: true // createdAt, updatedAt
   }
+
 );
 
 module.exports = mongoose.model("Catering", cateringSchema);

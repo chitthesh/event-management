@@ -33,7 +33,9 @@ exports.addCatering = async (req, res) => {
       name,
       category,
       pricePerPlate,
+      type,
       image: image || "" // optional
+
     });
 
     res.status(201).json(item);
