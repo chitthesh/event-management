@@ -1,10 +1,11 @@
 import axios from "axios";
 
+/* ✅ BASE URL FROM ENV */
 const API = axios.create({
- baseURL: `${import.meta.env.VITE_API_URL}/api`,
+  baseURL: `${import.meta.env.VITE_API_URL}/api`,
 });
 
-/* 🔐 ATTACH TOKEN TO EVERY REQUEST */
+/* 🔐 ATTACH TOKEN */
 API.interceptors.request.use(
   (req) => {
     const stored = localStorage.getItem("user");
@@ -15,8 +16,7 @@ API.interceptors.request.use(
         if (user?.token) {
           req.headers.Authorization = `Bearer ${user.token}`;
         }
-      } catch (err) {
-        console.error("Invalid user in localStorage");
+      } catch {
         localStorage.removeItem("user");
       }
     }
@@ -26,16 +26,13 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-/* 🚨 HANDLE 401 (AUTO LOGOUT) */
+/* 🚨 AUTO LOGOUT ON 401 */
 API.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
-      console.warn("Unauthorized – logging out");
-
       localStorage.removeItem("user");
 
-      // optional redirect
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";
       }
